@@ -8,25 +8,30 @@ import openai
 
 app = Flask(__name__)
 
-def get_content(link):
+def configure_chrome_options():
     chrome_options = Options()
     chrome_options.add_argument('--headless')
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--disable-dev-shm-usage')
+    return chrome_options
+
+def create_webdriver():
+    return webdriver.Chrome(options=configure_chrome_options())
+
+def get_content(link):
 
     # Ignore SSL errors
     capabilities = webdriver.DesiredCapabilities.CHROME.copy()
     capabilities['acceptSslCerts'] = True
     capabilities['acceptInsecureCerts'] = True
 
-    driver = webdriver.Chrome(options=chrome_options)
+    driver = create_webdriver()
 
     try:
         driver.get(link)
         time.sleep(10)
         page_source = driver.page_source
         soup2 = BeautifulSoup(page_source, 'html.parser')
-
         paragraphs = soup2.find_all('p')
         text_content = [p.get_text() for p in paragraphs]
 
@@ -44,15 +49,8 @@ def index():
         question = request.form['question']
         openai.api_key = request.form['api_key']
 
-        chrome_options = Options()
-        chrome_options.add_argument('--headless')
-        chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--disable-dev-shm-usage')
+        driver = create_webdriver()
 
-        driver = webdriver.Chrome(options=chrome_options)
-
-        # url = 'https://www.kiplinger.com/search?searchTerm=What+is+the+equities+market+outlook+for+2024%3F'
-        # Construct the search URL based on the user's question with proper encoding
         search_params = {'searchTerm': question}
         url = f'https://www.kiplinger.com/search?{urlencode(search_params)}'
 
@@ -77,7 +75,7 @@ def index():
         prompt = " ".join(prompt.split()[:3800])
 
         response = openai.Completion.create(
-            engine="text-davinci-003",
+            engine="gpt-3.5-turbo-instruct",
             prompt=prompt,
             max_tokens=200,  # Assuming a maximum context length of 4096 tokens
             n=1,
