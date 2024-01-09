@@ -1,10 +1,10 @@
-from flask import Flask, request, render_template
-from bs4 import BeautifulSoup
-from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-import time
+from flask import Flask, request, render_template
 from urllib.parse import urlencode
+from selenium import webdriver
+from bs4 import BeautifulSoup
 import openai
+import time
 
 app = Flask(__name__)
 
