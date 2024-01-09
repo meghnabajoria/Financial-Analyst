@@ -2,27 +2,54 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask App</title>
+    <title>OpenAI Flask App</title>
 </head>
 <body>
-    <h1>Flask App</h1>
+    <h1>OpenAI Flask App</h1>
+    <form method="post">
+        <label for="question">Enter your question:</label>
+        <input type="text" name="question" required>
 
-    <form method="POST" action="{{ url_for('process') }}">
-
-        <label for="instruction">Enter your question:</label>
-        <input type="text" id="instruction" name="instruction" required>
+        <label for="api_key">Enter your OpenAI API key:</label>
+        <input type="text" name="api_key" required>
 
         <button type="submit">Submit</button>
     </form>
-
-    {% if question %}
-        <p>Question: {{ question }}</p>
-    {% endif %}
-
     {% if result %}
-        <h3>Result:</h3>
+        <h2>Response:</h2>
         <p>{{ result }}</p>
     {% endif %}
 </body>
 </html>
+
+{#=============================================#}
+{#<!DOCTYPE html>#}
+{#<html lang="en">#}
+{#<head>#}
+{#    <meta charset="UTF-8">#}
+{#    <meta name="viewport" content="width=device-width, initial-scale=1.0">#}
+{#    <title>Flask App</title>#}
+{#</head>#}
+{#<body>#}
+{#    <h1>Flask App</h1>#}
+{##}
+{#    <form method="POST" action="{{ url_for('process') }}">#}
+{##}
+{#        <label for="instruction">Enter your question:</label>#}
+{#        <input type="text" id="instruction" name="instruction" required>#}
+{##}
+{#        <button type="submit">Submit</button>#}
+{#    </form>#}
+{##}
+{#    {% if question %}#}
+{#        <p>Question: {{ question }}</p>#}
+{#    {% endif %}#}
+{##}
+{#    {% if result %}#}
+{#        <h3>Result:</h3>#}
+{#        <p>{{ result }}</p>#}
+{#    {% endif %}#}
+{#</body>#}
+{#</html>#}

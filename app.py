@@ -1,40 +1,12 @@
-from flask import Flask, render_template, request
+from flask import Flask, request, render_template
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import time
-from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
-from langchain_community.llms import HuggingFacePipeline
-from transformers import pipeline
-from accelerate import Accelerator
-import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
-from urllib.parse import quote
-
-BASE_URL = "https://www.kiplinger.com/"
+from urllib.parse import urlencode
+import openai
 
 app = Flask(__name__)
-
-accelerator = Accelerator()
-
-model_name = "databricks/dolly-v2-3b"
-model = AutoModelForCausalLM.from_pretrained(model_name)
-
-# Apply torch_dtype and device_map after loading
-model = model.to(torch.bfloat16)
-model = accelerator.prepare(model, device_maps="auto", offload_folder="D:\\FinancialAnalyst\\offloaded")
-
-# Create the Hugging Face pipeline once
-generate_text = pipeline(model=model, device=0)
-
-generate_text = pipeline(model="databricks/dolly-v2-7b", torch_dtype=torch.bfloat16,
-                         trust_remote_code=True, device_map="auto", offload_folder="D:\\FinancialAnalyst\\offloaded")
-hf_pipeline = HuggingFacePipeline(pipeline=generate_text)
-llm_context_chain = LLMChain(llm=hf_pipeline,
-                             prompt=PromptTemplate(input_variables=["instruction", "context"],
-                                                   template="{instruction}\n\nInput:\n{context}"))
-
 
 def get_content(link):
     chrome_options = Options()
@@ -42,45 +14,80 @@ def get_content(link):
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--disable-dev-shm-usage')
 
+    # Ignore SSL errors
+    capabilities = webdriver.DesiredCapabilities.CHROME.copy()
+    capabilities['acceptSslCerts'] = True
+    capabilities['acceptInsecureCerts'] = True
+
     driver = webdriver.Chrome(options=chrome_options)
 
     try:
         driver.get(link)
         time.sleep(10)
         page_source = driver.page_source
-        soup = BeautifulSoup(page_source, 'html.parser')
-        paragraphs = soup.find_all('p')
+        soup2 = BeautifulSoup(page_source, 'html.parser')
+
+        paragraphs = soup2.find_all('p')
         text_content = [p.get_text() for p in paragraphs]
 
-        return ' '.join(text_content)
+        return text_content
 
     except Exception as e:
-        return f"Error during content retrieval: {e}"
+        print(f"Error during content retrieval: {e}")
 
     finally:
         driver.quit()
 
-
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
+    if request.method == 'POST':
+        question = request.form['question']
+        openai.api_key = request.form['api_key']
+
+        chrome_options = Options()
+        chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--disable-dev-shm-usage')
+
+        driver = webdriver.Chrome(options=chrome_options)
+
+        # url = 'https://www.kiplinger.com/search?searchTerm=What+is+the+equities+market+outlook+for+2024%3F'
+        # Construct the search URL based on the user's question with proper encoding
+        search_params = {'searchTerm': question}
+        url = f'https://www.kiplinger.com/search?{urlencode(search_params)}'
+
+        driver.get(url)
+
+        time.sleep(10)
+        page_source = driver.page_source
+        soup = BeautifulSoup(page_source, 'html.parser')
+        top_3_content = soup.find_all('li', class_='listing__item listing__item--alternate')
+        context = ""
+        for item in top_3_content[:2]:
+            link_element = item.find('a', class_='listing__link')
+            if link_element:
+                link = link_element.get('href')
+                context_in_one_list = get_content(link)
+                context += ' '.join(context_in_one_list)
+            else:
+                print("Link not found.")
+        driver.quit()
+
+        prompt = f"{question}\n\nInput:\n{context}"
+        prompt = " ".join(prompt.split()[:3800])
+
+        response = openai.Completion.create(
+            engine="text-davinci-003",
+            prompt=prompt,
+            max_tokens=200,  # Assuming a maximum context length of 4096 tokens
+            n=1,
+            stop=None
+        )
+
+        result = response.choices[0].text.lstrip()
+        return render_template('index.html', result=result)
+
     return render_template('index.html')
 
-
-@app.route('/process', methods=['POST'])
-def process():
-    instruction = request.form['instruction']
-
-    url = f"{BASE_URL}?q={quote(instruction)}"
-
-    context = get_content(url)
-    limited_context = ' '.join(context)[:500]  # Limit context length
-
-    with accelerator.device():
-        result = llm_context_chain.predict(instruction=instruction,
-                                           context=limited_context).lstrip()
-
-    return render_template('index.html', url=url, result=result)
-
-
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True)
