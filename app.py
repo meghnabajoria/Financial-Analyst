@@ -73,7 +73,7 @@ def index():
             soup = BeautifulSoup(page_source, 'html.parser')
             results = soup.find_all('li', class_='listing__item listing__item--alternate')
 
-            for item in results[:2]:
+            for item in results[:1]:
                 link_element = item.find('a', class_='listing__link')
                 if link_element:
                     link = link_element.get('href')
