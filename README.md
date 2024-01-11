@@ -1,5 +1,5 @@
 # About
-This Flask-based chatbot integrates the GPT (Generative Pre-trained Transformer) API to answer finance-related questions. Additionally, it incorporates web scraping from the Kiplinger website to enhance the accuracy of responses.
+This Flask-based chatbot integrates the GPT (Generative Pre-trained Transformer) API to answer finance-related questions. Additionally, it incorporates web scraping from the Kiplinger website to enhance the accuracy of responses. Kiplinger is a renowned financial media company providing expert advice and insights on personal finance, investing, and business.
 
 # Installation
 1. clone the application.
