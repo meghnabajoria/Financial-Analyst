@@ -4,11 +4,6 @@ dotenv.config();
 import { action } from "./_generated/server";
 import { v } from "convex/values";
 
-const myVariable = process.env.SERVER_URL;
-
-// Using the environment variable in your code
-console.log(` hi + ${process.env.SERVER_URL}`);
-
 // Define a Convex action function to send text to Flask API
 export const sendTextToFlask = action({
   
