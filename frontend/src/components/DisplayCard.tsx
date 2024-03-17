@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Box, Button, Container, Heading, Input, Stack, Text } from '@chakra-ui/react';
-import { useAction } from 'convex/react';
+import { useAction, useConvexAuth } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 
 const DisplayCard: React.FC = () => {
   const [inputValue, setInputValue] = useState('');
   const [outputValue, setOutputValue] = useState('');
   const [loading, setLoading] = useState(false); // Add loading state
+  const { isAuthenticated } = useConvexAuth();
 
   const sendTextToFlask = useAction(api.myFunctions.sendTextToFlask);
 
@@ -56,7 +57,7 @@ const DisplayCard: React.FC = () => {
           bg="green.400"
           rounded="full"
           px={6}
-          onClick={handleSubmit}
+          onClick={()=> isAuthenticated?handleSubmit():console.log("sign in")}
           _hover={{
             bg: 'green.500',
           }}

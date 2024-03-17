@@ -1,6 +1,13 @@
 // convex/functions.ts
+import dotenv from 'dotenv';
+dotenv.config();
 import { action } from "./_generated/server";
 import { v } from "convex/values";
+
+const myVariable = process.env.SERVER_URL;
+
+// Using the environment variable in your code
+console.log(` hi + ${process.env.SERVER_URL}`);
 
 // Define a Convex action function to send text to Flask API
 export const sendTextToFlask = action({
@@ -8,7 +15,7 @@ export const sendTextToFlask = action({
   args: { text: v.string() }, // Define an argument 'text' of type string
   handler: async (_, args) => { // Define a handler function that receives arguments
     try {
-      const response = await fetch('https://financial-analyst-b6ionklfnq-uc.a.run.app/ask', {
+      const response = await fetch(process.env.SERVER_URL+'/ask', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
