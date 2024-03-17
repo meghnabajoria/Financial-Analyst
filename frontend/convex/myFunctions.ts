@@ -1,6 +1,4 @@
 // convex/functions.ts
-import dotenv from 'dotenv';
-dotenv.config();
 import { action } from "./_generated/server";
 import { v } from "convex/values";
 
