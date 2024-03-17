@@ -8,8 +8,10 @@ import { ChakraProvider } from "@chakra-ui/react";
 const App: React.FC = () => {
   return (
     <ChakraProvider>
+      
       <Router>
           <Routes>
+            
             <Route path="/" element={<Home />} />
             {/* Add other routes here */}
           </Routes>

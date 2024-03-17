@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { SignInButton } from "@clerk/clerk-react";
 import {
   Box,
   Flex,
@@ -18,11 +19,9 @@ const NavBar: React.FC = () => {
 
         {/* Sign In and Sign Up buttons */}
         <Flex>
-          <Button variant="ghost" as={Link} to="/signin" mr={2}>
-            Sign In
-          </Button>
-          <Button as={Link} to="/signup" colorScheme="pink">
-            Sign Up
+          <Button colorScheme='pink'>
+            <SignInButton mode="modal" />
+            {/* Sign In */}
           </Button>
         </Flex>
       </Flex>
