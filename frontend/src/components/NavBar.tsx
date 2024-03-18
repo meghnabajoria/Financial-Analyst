@@ -29,7 +29,7 @@ const NavBar: React.FC = () => {
           ) : (
             <Flex alignItems="center">
               <Text fontSize="md">{user?.fullName}</Text>
-              <Button ml={2}>
+              <Button ml={2} colorScheme='red'>
                 <SignOutButton />
               </Button>
             </Flex>
